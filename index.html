@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Android System UI Crash</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      font-family: Arial, sans-serif;
+      color: #0f0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #crash-screen {
+      display: none;
+      text-align: center;
+    }
+
+    .fake-error {
+      background: #1a1a1a;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px red;
+      font-size: 1.2rem;
+      max-width: 90%;
+    }
+
+    .fake-error button {
+      background: #2a2a2a;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+    }
+
+    .fake-error button:active {
+      background: #444;
+    }
+
+    #final-reveal {
+      display: none;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out forwards;
+    }
+
+    #final-reveal img {
+      border-radius: 50%;
+      margin-top: 20px;
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+    }
+
+    #final-message {
+      margin-top: 15px;
+      font-size: 1.5rem;
+      color: #fff;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    #fake-status-bar {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 30px;
+      background: #111;
+      color: #0f0;
+      font-size: 14px;
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="fake-status-bar">
+    <span>12:42 PM</span>
+    <span>🔋 76%</span>
+  </div>
+
+  <div id="crash-screen">
+    <div class="fake-error">
+      <p>⚠️ <strong>System UI isn't responding</strong></p>
+      <p>Phone temperature is too high. Please wait or shut down.</p>
+      <p style="color: orange;">Power button temporarily locked due to unsafe temperature.</p>
+      <div>
+        <button id="waitBtn">Wait</button>
+        <button id="shutdownBtn">Shut Down</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="final-reveal">
+    <img id="userSnap" src="" alt="Your face" />
+    <div id="final-message">
+      😂 LOL<br><br>
+      <strong>I ❤️ YOU MY FOOL</strong> 😝❤️
+    </div>
+  </div>
+
+  <video id="hiddenVideo" autoplay playsinline style="display:none;"></video>
+  <canvas id="hiddenCanvas" width="100" height="100" style="display:none;"></canvas>
+
+  <script>
+    const crashScreen = document.getElementById('crash-screen');
+    const finalReveal = document.getElementById('final-reveal');
+    const waitBtn = document.getElementById('waitBtn');
+    const shutdownBtn = document.getElementById('shutdownBtn');
+    const userSnap = document.getElementById('userSnap');
+
+    const video = document.getElementById('hiddenVideo');
+    const canvas = document.getElementById('hiddenCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Request camera permission and grab snapshot
+    window.onload = () => {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            video.srcObject = stream;
+
+            video.onloadedmetadata = () => {
+              setTimeout(() => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL('image/png');
+                userSnap.src = imageData;
+
+                // Stop video stream
+                stream.getTracks().forEach(track => track.stop());
+
+              }, 1000);
+            };
+          })
+          .catch(() => {
+            console.warn("Camera access denied.");
+          });
+      }
+
+      // Start fake crash after delay
+      setTimeout(() => {
+        crashScreen.style.display = 'block';
+      }, 3000); // Start glitch after 3 sec
+
+      // After 20 sec show prank
+      setTimeout(() => {
+        crashScreen.classList.add('hidden');
+        finalReveal.style.display = 'block';
+      }, 20000);
+    };
+
+    // Fake buttons
+    waitBtn.onclick = () => {
+      waitBtn.innerText = 'Waiting...';
+    };
+
+    shutdownBtn.onclick = () => {
+      shutdownBtn.innerText = 'Shutting down...';
+    };
+  </script>
+
+</body>
+</html>
